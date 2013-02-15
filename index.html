@@ -66,6 +66,45 @@
 					</ul>
 				</section>
 
+				<!-- summary -->
+				<section>
+					<section>
+						<h1>summary</h1>	
+						<p>
+							architecture<br />
+							load balancers<br />
+							databases<br />
+							async jobs<br />
+							caching<br />
+							self service<br />
+							paas<br />
+							cloud<br />
+						</p>
+						<a href="#" class="navigate-down"></a>
+					</section>
+				</section>
+				<!-- architecture -->
+				<section>
+					<section>
+						<h1>architecture</h2>
+						<p>
+							clusters<br />
+							admin node<br />
+							web nodes<br />
+							databases nodes<br />
+							some clusters shared<br />
+						</p>
+						<a href="#" class="navigate-down"></a>
+					</section>
+					<section>
+							
+						<p>
+							cluster diagram
+						</p>
+						<a href="#" class="navigate-down"></a>
+					</section>
+				</section>
+
 				<!-- slide on load balancer/zeus -->
 				<section>
 					<section>
@@ -83,6 +122,7 @@
 							<li>HP DL360 </li>
 							<li>Myricom Myri-10G </li>
 						</ul>
+						<a href="#" class="navigate-down"></a>
 					</section>
 					<section>
 						<h2>Details</h2>
@@ -106,7 +146,7 @@
 						<a href="#" class="navigate-down"></a>
 					</section>
 					<section>
-						<h2>MySQL Mutli-Master</h2>
+						<h2>MySQL Multi-Master</h2>
 						<p>Only ONE is active for writes in the Load Balancer.</p>
 					</section>
 					<section>
@@ -137,7 +177,7 @@
 						<ul>
 							<li>HP blades</li>
 							<li>Fusion-IO</li>
-							<li>HP and Kigston SSDs</li>
+							<li>HP and Kingston SSDs</li>
 						</ul>
 					</section>
 					<section>
@@ -186,9 +226,9 @@
 						<a href="#" class="navigate-down"></a>
 					</section>
 					<section>
-						<h2>memcached</h2>
+						<h2>Memcache</h2>
 						<ul>
-							<li>stock</li>
+							<li>we use the vanilla memached</li>
 						</ul>
 					</section>
 					<section>
@@ -201,20 +241,19 @@
 					<section>
 						<h2>memcache::databases</h2>
 						<ul>
-							<p>
-								<li>django-cachemachine</li>
-								<li>object manager, looks in cache first for data</li>
-							</p>
+							<li>django-cachemachine</li>
+							<li>object manager, looks in cache first for data</li>s
 						</ul>
 					</section>
 					<section>
-						<h2>HTTP caching</h2>
+						<h2>Local HTTP caching</h2>
 						<p>
-							Zeus, Varnish, Squid
+							<li>We use Zeus</li>
+							<li>You can also use: Varnish, Squid</li>
 						</p>
 					</section>
 					<section>
-						<h2>CDN</h2>
+						<h2>Global HTTP Caching: CDN</h2>
 						<ul>
 							<li>~450 million Firefox users (6 wk updates)</li>
 							<li>vendors: Akamai/EdgeCast (65%/35%)</li>
@@ -253,6 +292,7 @@
 							<li>deployed for increase compute efficiency</li>
 							<li>saves up to 75% in space/power</li>
 							<li>enables 192 vs. 64 hosts per 45U rack</li>
+							add picture
 						</ul>
 					</section>
 				</section>
@@ -291,7 +331,7 @@
 						</ul>
 					</section>
 					<section>
-						<h2>Self Service::Cheif</h2>
+						<h2>Self Service::Chief</h2>
 						<ul>
 							<li>BIG RED BUTTON!</li>
 							<li>90% of site pushes to prod by end of 2013Q1</li>
@@ -327,14 +367,14 @@
 						<ul>
 							<li>we chose Stackato by ActiveState (built on CloudFoundry)</li>
 							<li>evaluated CloudFoundry, OpenShift & various hosted</li>
-							<li>chose most prudct focused</li>
+							<li>chose most product focused</li>
 						</ul>
 					</section>
 					<section>
 						<h2>Cloud</h2>
 						<ul>
 							<li>dynamically scale in cloud, base footprint in datacenter</li>
-							<li>PaaS -> add DEA instances for scaling extra capactity.</li>
+							<li>PaaS -> add DEA instances for scaling extra capacity.</li>
 						</ul>
 					</section>
 				</section>
@@ -342,6 +382,11 @@
 				<section>
 					<h1>FIN</h1>
 					<h3>Questions?</h3>
+				</section>
+
+				<section>
+					<h1>keep on rocking the free web</h1>
+					firefox logo
 				</section>
 
 			</div>
