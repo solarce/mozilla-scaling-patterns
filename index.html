@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Scaling Websites @ mozilla</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Brandon Burton <@solarce>">
+		<meta name="author" content="Chris Turra <@cturra>">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/mozilla.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+
+				<!-- slides to test projector/etc -->
+				<section>
+					<img src="img/firefox_logo-1000.png" />
+				</section>
+
+				<section>
+					<img src="img/firefox_marketplace_logo-1000.png" />
+				</section>
+
+				<!-- start of actual slides -->
+				<section>
+					<h1>Scaling Websites</h1>
+					<h3>Some Lessons Learned at</h3>
+					<p>
+						<center><br /><img src="img/mozilla_wordmark.png" /></center>
+					</p>
+				</section>
+
+				<section>
+					<h1>Who are you guys?</h1>
+					<ul>
+						<li>Brandon Burton <<a href="https://twitter.com/solarce">@solarce</a>></li>
+						<li>Chris Turra <<a href="https://twitter.com/cturra">@cturra</a>></li>
+					</ul>
+					<p>
+						<br /><small>we both work in web operations @ mozilla</small>
+					</p>
+				</section>
+
+				<section>
+					<h1>Not just firefox?</h1>
+					<ul>
+						<li>mozilla.org (Firefox downloads)</li>
+						<li>input.mozilla.org (happy/sad face)</li>
+						<li>crash-stats.mozilla.org (crash reporting)</li>
+						<li>support.mozilla.org (user support community)</li>
+						<li>... and hundreds more</li>
+					</ul>
+				</section>
+
+				<!-- summary -->
+				<section>
+					<section>
+						<h1>summary</h1>	
+						<p>
+							architecture<br />
+							load balancers<br />
+							databases<br />
+							async jobs<br />
+							caching<br />
+							self service<br />
+							paas<br />
+							cloud<br />
+						</p>
+						<a href="#" class="navigate-down"></a>
+					</section>
+				</section>
+				<!-- architecture -->
+				<section>
+					<section>
+						<h1>architecture</h2>
+						<p>
+							clusters<br />
+							admin node<br />
+							web nodes<br />
+							databases nodes<br />
+							some clusters shared<br />
+						</p>
+						<a href="#" class="navigate-down"></a>
+					</section>
+					<section>
+						<img src="img/web_cluster_overview.png" class="img_border" />
+					</section>
+				</section>
+
+				<!-- slide on load balancer/zeus -->
+				<section>
+					<section>
+						<h1>Load Balancers</h1>
+						<p>
+							Zeus (now Stingray)<br />
+							software solution
+						</p>
+						<a href="#" class="navigate-down"></a>
+					</section>
+					<section>
+						<h2>Platform</h2>
+						<ul>
+							<li>RHEL6 </li>
+							<li>HP DL360 </li>
+							<li>Myricom Myri-10G </li>
+						</ul>
+						<a href="#" class="navigate-down"></a>
+					</section>
+					<section>
+						<h2>Details</h2>
+						<p>
+							in front of nearly everything
+						</p>
+						<ul>
+							<li>apache, mysql, elasticsearch, hadoop</li>
+							<li>200k packets per second for SSL</li>
+						</ul>
+					</section>
+				</section>
+
+				<!-- databases -->
+				<section>
+					<section>
+						<h1>Databases</h1>
+						<i>
+							/dev/null is web scale.
+						</i>
+						<a href="#" class="navigate-down"></a>
+					</section>
+					<section>
+						<h2>MySQL Multi-Master</h2>
+						<p>Only ONE is active for writes in the Load Balancer.</p>
+					</section>
+					<section>
+						<h2>Read Slaves</h2>
+						<p>Write to master, but only read from slaves.</p>
+						<pre><code>
+ DATABASES = {
+    ...
+
+    'slave': {
+       'ENGINE': 'django.db.backends.mysql',
+       'NAME': 'mozillians_org',
+       'USER': 'mozillians',
+       'PASSWORD': 'YoUt#!nk+h1$izR3@l?',
+       'HOST': 'generic-ro-zeus',
+       'PORT': '3306',
+    },
+ }
+
+ SLAVE_DATABASES = ['slave']
+						</pre></code>
+					</section>
+					<section>
+						<h2>Hardware</h2>
+						<p>
+							No virtualization in production.
+						</p>
+						<ul>
+							<li>HP blades</li>
+							<li>Fusion-IO</li>
+							<li>HP and Kingston SSDs</li>
+						</ul>
+					</section>
+					<section>
+						<h2>DBA's</h2>
+						<p>
+							AWESOME DBA's are AWESOME!<br />
+							+query optimation like code reviews.
+						</p>
+					</section>
+				</section>
+
+				<!-- asynchronous jobs --> 
+				<section>
+					<section>
+						<h1>A'SYNC Jobs</h1>
+						<i>
+							webscale boy band
+						</i>
+						<a href="#" class="navigate-down"></a>
+					</section>
+					<section>
+						<h2>Celery</h2>
+						<ul>
+							<li>don't block the web app</li>
+							<li>written in python & we use django</li>
+							<li>supervisord for celeryd</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Rabbit MQ</h2>
+						<ul>
+							<li>message queue between web app & celery service</li>
+							<li>cluster per datacenter</li>
+							<li>puppet module to horizontally scale</li>
+						</ul>
+					</section>
+				</section>
+
+				<!-- cache -->
+				<section>
+					<section>
+						<h1>Cache</h1>
+						<i>
+							rules everything around me
+						</i>
+						<a href="#" class="navigate-down"></a>
+					</section>
+					<section>
+						<h2>Memcache</h2>
+						<ul>
+							<li>we use the vanilla memached</li>
+						</ul>
+					</section>
+					<section>
+						<h2>memcache::data</h2>
+						<ul>
+							<li>ephemeral data (sessions/rss feeds/etc)</li>
+							<li>short lived and can be lost without impact</li>
+						</ul>
+					</section>
+					<section>
+						<h2>memcache::databases</h2>
+						<ul>
+							<li>django-cachemachine</li>
+							<li>object manager, looks in cache first for data</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Local HTTP caching</h2>
+						<p>
+							<li>We use Zeus</li>
+							<li>You can also use: Varnish, Squid</li>
+						</p>
+					</section>
+					<section>
+						<h2>Global HTTP Caching: CDN</h2>
+						<ul>
+							<li>~450 million Firefox users (6 wk updates)</li>
+							<li>vendors: Akamai/EdgeCast (65%/35%)</li>
+							<li>balance traffic with DynECT base on response</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Akamai::FF18 HPS</h2>
+						<p>
+							<i>Jan 10, 2013 -> Jan 13, 2013 inclusive.</i>
+						</p>
+						<ul>
+							<li>Total hits: 5.5 billion</li>
+							<li>Peak HPS: 58,379.7 hits/sec</li>
+						</ul>
+						<img src="img/akamai-ff18-hps.png" class="img_border" />
+					</section>
+					<section>
+						<h2>Akamai::FF18 Bandwidth</h2>
+						<p>
+							<i>Jan 10, 2013 -> Jan 13, 2013 inclusive.</i>
+						</p>
+						<ul>
+							<li>Total volume: 2.1PB</li>
+							<li>Peak traffic: 163.177 GBit/sec</li>
+						</ul>
+						<img src="img/akamai-ff18-bandwidth.png" class="img_border" />
+					</section>
+				</section>
+
+				<!-- scale out web servers -->
+				<section>
+					<section>
+						<h1>Scale Out</h1>
+						<i>
+							or you fail out
+						</i>
+						<a href="#" class="navigate-down"></a>
+					</section>
+					<section>
+						<h2>Config Management</h2>
+						<p>
+							We chose Puppet, but there are other great options like: Chef & CFEngine
+						</p>
+					</section>
+					<section>
+						<h2>Disposable Web Heads</h2>
+						<ul>
+							<li>nothing is shared</li>
+							<li>Seamicro Xeon</li>
+							<li>common files (uploads/css/js) in NetApp NFS</li>
+							<li>S3 to replace NFS for upload storage (amo/marketplace)</li>
+						</ul>
+					</section>
+					<section>
+						<h2>AMD Seamicro</h2>
+						<ul>
+							<li>deployed for increase compute efficiency</li>
+							<li>saves up to 75% in space/power</li>
+							<li>enables 192 vs. 64 hosts per 45U rack</li>
+						</ul>
+						<img src="img/seamicro2.png" class="img_border" />
+					</section>
+				</section>
+
+				<!-- the future -->
+				<section>
+					<section>
+						<h1>The Future</h1>
+						<i>
+							where we're going, we don't need roads
+						</i>
+						<a href="#" class="navigate-down"></a>
+					</section>
+					<section>
+						<h2>DevOps culture</h2>
+						<ul>
+							<li>blameless postmortems</li>
+							<li>all invested in the same mission</li>
+							<li>continuous improvement (always try to make the process better)</li>
+							<li>hire the best f$*!ing people</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Self Service::Goal</h2>
+						<p>
+							to become platform engineers!
+						</p>
+					</section>
+					<section>
+						<h2>Self Service::Continuous Deployment</h2>
+						<ul>
+							<li>django-waffle</li>
+							<li>dark launching / feature flags</li>
+							<li>sumo, amo, input, mdn</li>
+							<li>if flag_is_active, checks, cookies, superuser, group, "dice roll"</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Self Service::Chief</h2>
+						<ul>
+							<li>90% of site pushes to prod by end of 2013Q1</li>
+						</ul>
+						<img src="img/bigred.png" class="img_border" />
+					</section>
+					<section>
+						<h2>Self Service::Jenkins</h2>
+						<ul>
+							<li>socorro - tarballs</li>
+							<li>stage autodeploys</li>
+						</ul>
+						<img src="img/jenkins.png" class="img_border" />
+					</section>
+					<section>
+						<h2>Self Service::Graphite</h2>
+						<p>
+							everyone has access to the graphs, real time.
+						</p>
+						<img src="img/graphite.png" class="img_border" />
+					</section>
+					<section>
+						<h2>Self Service::Logstash</h2>
+						<p>
+							With Kibana, everyone has access to the logs. <br />yup, real time.
+						</p>
+						<img src="img/kibana.png" class="img_border" />
+					</section>
+					<section>
+						<h2>Self Service::Sentry</h2>
+						<p>
+							everyone has access to exception tracking.<br />you guessed it, real time!
+						</p>
+						<img src="img/sentry.png" class="img_border" />
+					</section>
+					<section>
+						<h2>PaaS</h2>
+						<ul>
+							<li>we chose Stackato by ActiveState (built on CloudFoundry)</li>
+							<li>evaluated CloudFoundry, OpenShift & various hosted</li>
+							<li>chose most product focused</li>
+						</ul>
+						<img src="img/stackato.png" class="img_border" />
+					</section>
+					<section>
+						<h2>Cloud</h2>
+						<ul>
+							<li>dynamically scale in cloud, base footprint in datacenter</li>
+							<li>PaaS -> add DEA instances for scaling extra capacity.</li>
+						</ul>
+						<img src="img/cloud.png" class="img_border" />
+					</section>
+				</section>
+
+				<section>
+					<h1>keep on rockin'<br />the free web</h1>
+					<img src="img/firefox_logo-250.png" />
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
